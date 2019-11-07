@@ -1,0 +1,5 @@
+Is it Sanger: Yes
+Is it Solexa: No
+Is it Ilumina1.3: No
+Is it Ilumina1.5: No
+Is it Ilumina1.8: Yes

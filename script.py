@@ -1,5 +1,8 @@
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 from Bio.SeqUtils import GC
+import matplotlib.pyplot as plt
+from Bio.Blast import NCBIWWW
+from Bio.Blast import NCBIXML
 
 def doesQualityIsInSequence(qual, seq):
     x = True
@@ -13,10 +16,12 @@ result = open("result.txt", "w")
 #Nuskaitymas
 file = open("reads_for_analysis.fastq")
 
+titles = []
 sequences = []
 qualities = []
 
 for title, seq, qual in FastqGeneralIterator(file):
+    titles.append(title)
     sequences.append(seq)
     qualities.append(qual)
 
@@ -81,12 +86,86 @@ else:
     result.write("No\n")
 
 #Grafikas
-gcsFile = open("gc.txt", "w")
 GCs = []
 for seq in sequences:
     gc = GC(seq)
     GCs.append(gc)
-    gcsFile.write(str(gc))
-    gcsFile.write("\n")
+plt.hist(GCs, bins=300)
+plt.show()
+
+#Finding 5 elements from each peak
+'''THIS CODE WAS USED TO FIND THE BIGGEST PEAK
+maxCount = 0
+maxi = 0
+for i in range(1, 100, 1):
+    _min = i - 0.5
+    _max = i + 0.5
+    count = 0
+    for gc in GCs:
+        if (gc > _min) and (gc < _max):
+            count = count + 1
+    if (count > maxCount):
+        maxCount = count
+        maxi = i
+
+print(str(maxCount))
+print("\n")
+print(str(maxi))
+'''
+
+ids = []
+
+#Peak1
+_min = 35
+_max = 36
+count = 0
+found = 0
+i = 0
+for gc in GCs:
+    if (gc > _min) and (gc < _max):
+        count = count + 1
+        if (found < 5):
+            ids.append(i)
+            found = found + 1
+    i = i + 1
+
+#Peak2
+_min = 53
+_max = 54
+count = 0
+found = 0
+i = 0
+for gc in GCs:
+    if (gc > _min) and (gc < _max):
+        count = count + 1
+        if (found < 5):
+            ids.append(i)
+            found = found + 1
+    i = i + 1
+
+#Peak3
+_min = 69.5
+_max = 70.5
+count = 0
+found = 0
+i = 0
+for gc in GCs:
+    if (gc > _min) and (gc < _max):
+        count = count + 1
+        if (found < 5):
+            ids.append(i)
+            found = found + 1
+    i = i + 1
+
+#Blast
+for i in ids:
+    print("Going to Blast")
+    print("Id: " + str(i))
+    result_handle = NCBIWWW.qblast("blastn", "nt", sequences[i], hitlist_size=1, megablast=True, entrez_query='bacteria')
+    print("Just got home")
+    res = result_handle.read()
+    f = open("blast" + str(i) + ".xml", "w")
+    f.write(res)
+    f.close()
 
 result.close()
